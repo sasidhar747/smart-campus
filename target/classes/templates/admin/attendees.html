@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: layout(~{::main})}">
+<body>
+    <main>
+        <a th:href="@{/admin/dashboard}" style="color: var(--primary); text-decoration: none; display: inline-block; margin-bottom: 1rem;">&larr; Back to Dashboard</a>
+        
+        <header style="margin-bottom: 2rem;">
+            <h1>Attendees for <span th:text="${event.title}">Event</span></h1>
+            <p style="color: var(--text-secondary);">List of students registered for this event.</p>
+        </header>
+
+        <div class="glass" style="padding: 1rem;">
+            <table th:if="${not #lists.isEmpty(registrations)}">
+                <thead>
+                    <tr>
+                        <th>Student Name</th>
+                        <th>Email</th>
+                        <th>Department</th>
+                        <th>Date Registered</th>
+                        <th>Rating</th>
+                        <th>Feedback</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="reg : ${registrations}">
+                        <td th:text="${reg.studentName}">Name</td>
+                        <td th:text="${reg.studentEmail}">Email</td>
+                        <td th:text="${reg.studentDepartment}">Dept</td>
+                        <td th:text="${#temporals.format(reg.registrationDate, 'dd MMM yyyy')}">Date</td>
+                        <td>
+                            <span th:if="${reg.rating > 0}" th:text="${'★'.repeat(reg.rating)}" style="color: #fbbf24;"></span>
+                            <span th:if="${reg.rating == 0}" style="color: var(--text-secondary);">N/A</span>
+                        </td>
+                        <td th:text="${reg.feedback}" style="max-width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" th:title="${reg.feedback}">Feedback</td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <div th:if="${#lists.isEmpty(registrations)}" style="text-align: center; padding: 3rem;">
+                <p style="color: var(--text-secondary);">No registrations for this event yet.</p>
+            </div>
+        </div>
+    </main>
+</body>
+</html>
