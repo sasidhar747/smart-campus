@@ -1,0 +1,6 @@
+services:
+  - type: web
+    name: smart-campus-events
+    env: docker
+    plan: free
+    dockerCommand: ""
