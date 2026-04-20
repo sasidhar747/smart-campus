@@ -1,15 +1,21 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: layout(~{::main})}">
 <body>
-    <main style="text-align: center; padding: 5rem 0;">
-        <div class="glass" style="max-width: 600px; margin: 0 auto; padding: 3rem;">
-            <h1 style="font-size: 4rem; color: var(--danger);">Oops!</h1>
-            <p style="font-size: 1.25rem; margin: 1.5rem 0;">Something went wrong on our end.</p>
-            <div class="glass" style="background: rgba(15, 23, 42, 0.4); padding: 1rem; text-align: left; margin-bottom: 2rem;">
-                <code th:text="${errorMessage}">Error details here...</code>
-            </div>
-            <a th:href="@{/}" class="btn btn-primary">Return to Safety</a>
+<main class="center-screen">
+    <section class="glass panel auth-card">
+        <span class="eyebrow" th:text="${statusCode != null ? 'Error ' + statusCode : 'Request Error'}">Error</span>
+        <h1>Something needs attention.</h1>
+        <p class="center-copy">The request could not be completed. The message below is shown through the global exception handler.</p>
+
+        <div class="alert alert-danger">
+            <span th:text="${errorMessage}">Error details</span>
         </div>
-    </main>
+
+        <div class="hero-actions">
+            <a th:href="@{/}" class="btn btn-primary">Return Home</a>
+            <a th:href="@{/login}" class="btn btn-secondary">Student Login</a>
+        </div>
+    </section>
+</main>
 </body>
 </html>

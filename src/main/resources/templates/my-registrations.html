@@ -1,74 +1,83 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: layout(~{::main})}">
 <body>
-    <main>
-        <header style="margin-bottom: 2rem;">
+<main>
+    <section class="section-header spread">
+        <div>
             <h1>My Registrations</h1>
-            <p style="color: var(--text-secondary);">Showing events for: <strong th:text="${email}">email@example.com</strong></p>
-        </header>
-
-        <div class="glass" style="padding: 1rem;">
-            <table th:if="${not #lists.isEmpty(registrations)}">
-                <thead>
-                    <tr>
-                        <th>Event</th>
-                        <th>Date Registered</th>
-                        <th>Department</th>
-                        <th>Status</th>
-                        <th>Feedback</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr th:each="reg : ${registrations}">
-                        <td th:text="${reg.eventTitle}">Event Title</td>
-                        <td th:text="${#temporals.format(reg.registrationDate, 'dd MMM yyyy')}">Date</td>
-                        <td th:text="${reg.studentDepartment}">Dept</td>
-                        <td><span class="badge badge-blue">Confirmed</span></td>
-                        <td>
-                            <div th:if="${reg.rating == 0}">
-                                <button class="btn glass" style="padding: 0.2rem 0.6rem; font-size: 0.75rem;" 
-                                        th:onclick="'showFeedbackForm(' + ${reg.id} + ')'">Rate</button>
-                                
-                                <div th:id="'form-' + ${reg.id}" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 100; width: 300px; padding: 1.5rem;" class="glass">
-                                    <h4 style="margin-bottom: 1rem;">Provide Feedback</h4>
-                                    <form th:action="@{/feedback}" method="post">
-                                        <input type="hidden" name="regId" th:value="${reg.id}" />
-                                        <input type="hidden" name="email" th:value="${email}" />
-                                        <div class="form-group">
-                                            <label>Rating (1-5)</label>
-                                            <input type="number" name="rating" min="1" max="5" value="5" />
-                                        </div>
-                                        <div class="form-group">
-                                            <label>Comment</label>
-                                            <textarea name="feedback" rows="3"></textarea>
-                                        </div>
-                                        <button type="submit" class="btn btn-primary" style="width: 100%;">Submit</button>
-                                        <button type="button" class="btn glass" style="width: 100%; margin-top: 0.5rem;" th:onclick="'hideFeedbackForm(' + ${reg.id} + ')'">Cancel</button>
-                                    </form>
-                                </div>
-                            </div>
-                            <div th:if="${reg.rating > 0}">
-                                <span th:text="${'★'.repeat(reg.rating)}" style="color: #fbbf24;"></span>
-                            </div>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-            
-            <script>
-                function showFeedbackForm(id) {
-                    document.getElementById('form-' + id).style.display = 'block';
-                }
-                function hideFeedbackForm(id) {
-                    document.getElementById('form-' + id).style.display = 'none';
-                }
-            </script>
-            
-            <div th:if="${#lists.isEmpty(registrations)}" style="text-align: center; padding: 3rem;">
-                <p style="color: var(--text-secondary);">No registrations found for this email.</p>
-                <a th:href="@{/}" class="btn btn-primary" style="margin-top: 1rem;">Browse Events</a>
-            </div>
+            <p>
+                Showing registration history for
+                <strong th:text="${email}">student@univ.edu</strong>
+            </p>
         </div>
-    </main>
+        <a th:href="@{/}" class="btn btn-secondary">Browse More Events</a>
+    </section>
+
+    <div th:if="${isAdminView and !isOwnRegistrations}" class="alert alert-info">
+        You are viewing another student's registration history as an admin.
+    </div>
+
+    <div th:if="${not #lists.isEmpty(registrations)}" class="registration-grid">
+        <article th:each="reg : ${registrations}" class="glass registration-card">
+            <div class="card-top">
+                <span class="badge badge-success">Confirmed</span>
+                <span class="muted-small" th:text="${reg.studentDepartment}">Department</span>
+            </div>
+
+            <h3 th:text="${reg.eventTitle}">Event Title</h3>
+            <p class="meta-line">
+                <span>Registered on</span>
+                <span th:text="${#temporals.format(reg.registrationDate, 'dd MMM yyyy, hh:mm a')}">Date</span>
+            </p>
+
+            <div th:if="${reg.rating > 0}" class="rating-row">
+                <span class="rating-stars">
+                    <span th:each="i : ${#numbers.sequence(1, reg.rating)}">&#9733;</span>
+                </span>
+                <span class="muted-small" th:text="${reg.rating + ' / 5'}">5 / 5</span>
+            </div>
+
+            <p th:if="${reg.feedback != null and !reg.feedback.isBlank()}" class="feedback-copy" th:text="${reg.feedback}">
+                Feedback text
+            </p>
+
+            <details th:if="${isOwnRegistrations and reg.rating == 0}" class="feedback-panel">
+                <summary class="btn btn-secondary">Add Feedback</summary>
+                <form th:action="@{/feedback}" method="post" class="stack-form compact-form">
+                    <input type="hidden" name="regId" th:value="${reg.id}">
+
+                    <div class="form-group">
+                        <label th:for="${'rating-' + reg.id}">Rating</label>
+                        <select name="rating" th:id="${'rating-' + reg.id}">
+                            <option value="5">5 - Excellent</option>
+                            <option value="4">4 - Very Good</option>
+                            <option value="3">3 - Good</option>
+                            <option value="2">2 - Average</option>
+                            <option value="1">1 - Needs Improvement</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label th:for="${'feedback-' + reg.id}">Comments</label>
+                        <textarea name="feedback" th:id="${'feedback-' + reg.id}" rows="4"
+                                  placeholder="Share what went well and what could improve."></textarea>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary full-width">Submit Feedback</button>
+                </form>
+            </details>
+
+            <p th:if="${isOwnRegistrations and reg.rating > 0}" class="muted-small">
+                Feedback already submitted for this registration.
+            </p>
+        </article>
+    </div>
+
+    <div th:if="${#lists.isEmpty(registrations)}" class="glass empty-state">
+        <h3>No event registrations found yet.</h3>
+        <p>Register for an upcoming event to see your history here.</p>
+        <a th:href="@{/}" class="btn btn-primary">Explore Upcoming Events</a>
+    </div>
+</main>
 </body>
 </html>

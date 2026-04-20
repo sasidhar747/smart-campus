@@ -1,49 +1,55 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: layout(~{::main})}">
 <body>
-    <main style="display: flex; justify-content: center; align-items: center; min-height: 80vh;">
-        <div class="glass" style="width: 100%; max-width: 500px; padding: 2.5rem;">
-            <h1 style="text-align: center; margin-bottom: 0.5rem;">Create Account</h1>
-            <p style="text-align: center; color: var(--text-secondary); margin-bottom: 2rem;">Join the campus event community.</p>
-
-            <div th:if="${errorMessage}" class="error-msg" style="text-align: center; margin-bottom: 1rem;" th:text="${errorMessage}"></div>
-
-            <form th:action="@{/signup}" th:object="${user}" method="post">
-                <div class="form-group">
-                    <label>Full Name</label>
-                    <input type="text" th:field="*{name}" placeholder="John Doe" />
-                    <p class="error-msg" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></p>
-                </div>
-
-                <div class="form-group">
-                    <label>Email Address</label>
-                    <input type="email" th:field="*{email}" placeholder="john@univ.edu" />
-                    <p class="error-msg" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></p>
-                </div>
-
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-                    <div class="form-group">
-                        <label>Password</label>
-                        <input type="password" th:field="*{password}" placeholder="••••••••" />
-                        <p class="error-msg" th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></p>
-                    </div>
-                    <div class="form-group">
-                        <label>Department</label>
-                        <select th:field="*{department}">
-                            <option value="Computer Science">Computer Science</option>
-                            <option value="Electrical Engineering">Electrical Engineering</option>
-                            <option value="Management">Management</option>
-                        </select>
-                    </div>
-                </div>
-
-                <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">Sign Up</button>
-                
-                <p style="text-align: center; margin-top: 1.5rem; font-size: 0.875rem; color: var(--text-secondary);">
-                    Already have an account? <a th:href="@{/login}" style="color: var(--primary);">Login here</a>
-                </p>
-            </form>
+<main class="center-screen">
+    <section class="glass panel auth-card">
+        <div class="section-header compact">
+            <div>
+                <h1>Create Student Account</h1>
+                <p>Sign up once, then use your account to register and review campus events.</p>
+            </div>
         </div>
-    </main>
+
+        <div th:if="${errorMessage}" class="alert alert-danger" th:text="${errorMessage}"></div>
+
+        <form th:action="@{/signup}" th:object="${user}" method="post" class="stack-form">
+            <div class="form-group">
+                <label for="name">Full Name</label>
+                <input id="name" type="text" th:field="*{name}" placeholder="Enter your full name">
+                <p class="error-msg" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></p>
+            </div>
+
+            <div class="form-group">
+                <label for="emailAddress">Email Address</label>
+                <input id="emailAddress" type="email" th:field="*{email}" placeholder="student@univ.edu">
+                <p class="error-msg" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></p>
+            </div>
+
+            <div class="two-col-grid">
+                <div class="form-group">
+                    <label for="passwordField">Password</label>
+                    <input id="passwordField" type="password" th:field="*{password}" placeholder="Minimum 6 characters">
+                    <p class="error-msg" th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></p>
+                </div>
+
+                <div class="form-group">
+                    <label for="departmentField">Department</label>
+                    <select id="departmentField" th:field="*{department}">
+                        <option th:each="department : ${departments}" th:value="${department}" th:text="${department}">
+                            Department
+                        </option>
+                    </select>
+                    <p class="error-msg" th:if="${#fields.hasErrors('department')}" th:errors="*{department}"></p>
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary full-width">Create Account</button>
+        </form>
+
+        <p class="center-copy">
+            Already registered? <a th:href="@{/login}">Login here</a>.
+        </p>
+    </section>
+</main>
 </body>
 </html>

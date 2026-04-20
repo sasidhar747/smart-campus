@@ -1,71 +1,99 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: layout(~{::main})}">
 <body>
-    <main>
-        <a th:href="@{/}" style="color: var(--primary); text-decoration: none; display: inline-block; margin-bottom: 1rem;">&larr; Back to Events</a>
-        
-        <div style="display: grid; grid-template-columns: 1.5fr 1fr; gap: 2rem;">
-            <!-- Event Info -->
-            <div class="glass" style="padding: 2rem;">
-                <span class="badge badge-blue" th:text="${event.type}">Type</span>
-                <h1 th:text="${event.title}" style="margin: 1rem 0;">Event Title</h1>
-                <div class="meta" style="font-size: 1.1rem; margin-bottom: 2rem;">
-                    <p>📅 <span th:text="${#temporals.format(event.eventDate, 'dd MMMM yyyy, HH:mm')}">Date</span></p>
-                    <p>📍 <span th:text="${event.location}">Location</span></p>
-                    <p>🏢 <span th:text="${event.department}">Department</span></p>
+<main>
+    <a th:href="@{/}" class="back-link">&larr; Back to all events</a>
+
+    <div class="detail-layout">
+        <section class="glass panel detail-panel">
+            <div class="card-top">
+                <span th:text="${event.type}" class="badge badge-primary">Type</span>
+                <span class="muted-small" th:text="${event.department}">Department</span>
+            </div>
+
+            <h1 th:text="${event.title}">Event Title</h1>
+            <p class="detail-copy" th:text="${event.description}">Description</p>
+
+            <div class="detail-meta-grid">
+                <div class="meta-card">
+                    <span>Date &amp; Time</span>
+                    <strong th:text="${#temporals.format(event.eventDate, 'dd MMM yyyy, hh:mm a')}">Date</strong>
                 </div>
-                
-                <h3>Description</h3>
-                <p th:text="${event.description}" style="line-height: 1.6; margin-top: 1rem; color: var(--text-secondary);"></p>
-                
-                <div style="margin-top: 3rem; padding-top: 1rem; border-top: 1px solid var(--glass-border);">
-                    <p><strong>Capacity:</strong> <span th:text="${event.registeredCount}">0</span> / <span th:text="${event.capacity}">10</span> registered</p>
+                <div class="meta-card">
+                    <span>Location</span>
+                    <strong th:text="${event.location}">Location</strong>
+                </div>
+                <div class="meta-card">
+                    <span>Capacity</span>
+                    <strong th:text="${event.registeredCount + ' / ' + event.capacity}">0 / 0</strong>
+                </div>
+                <div class="meta-card">
+                    <span>Available Seats</span>
+                    <strong th:text="${event.availableSeats}">0</strong>
                 </div>
             </div>
 
-            <!-- Registration Form -->
-            <div class="glass" style="padding: 2rem;">
-                <h2>Register for Event</h2>
-                <p style="margin-bottom: 1.5rem; color: var(--text-secondary);">Fill in your details to secure a spot.</p>
+            <div class="progress-track large">
+                <div class="progress-bar" th:style="'width:' + ${event.occupancyPercentage} + '%'"></div>
+            </div>
+        </section>
 
-                <div th:if="${errorMessage}" class="glass" style="padding: 1rem; background: rgba(239, 68, 68, 0.1); border-color: var(--danger); margin-bottom: 1rem;">
-                    <p class="error-msg" th:text="${errorMessage}"></p>
+        <section class="glass panel auth-panel">
+            <div th:if="${errorMessage}" class="alert alert-danger" th:text="${errorMessage}"></div>
+
+            <div th:if="${currentUser == null}" class="info-card">
+                <h2>Student Login Required</h2>
+                <p>Students need an account before registering. After login, your profile is used to fill the registration form automatically.</p>
+                <div class="hero-actions">
+                    <a th:href="@{/login}" class="btn btn-primary">Login</a>
+                    <a th:href="@{/signup}" class="btn btn-secondary">Create Account</a>
+                </div>
+            </div>
+
+            <div th:if="${currentUser != null}">
+                <div class="section-header compact">
+                    <div>
+                        <h2>Register for this Event</h2>
+                        <p>Your logged-in student account will be used for registration.</p>
+                    </div>
                 </div>
 
-                <form th:action="@{/register}" th:object="${registration}" method="post">
-                    <input type="hidden" th:field="*{eventId}" />
-                    
+                <div class="info-strip">
+                    <span th:text="${currentUser.name}">Student Name</span>
+                    <span>&middot;</span>
+                    <span th:text="${currentUser.email}">student@univ.edu</span>
+                </div>
+
+                <div th:if="${event.full}" class="alert alert-danger">
+                    This event has reached its capacity. Students cannot register until seats open up.
+                </div>
+
+                <form th:if="${!event.full}" th:action="@{/register}" th:object="${registrationForm}" method="post" class="stack-form">
+                    <input type="hidden" th:field="*{eventId}">
+
                     <div class="form-group">
-                        <label>Full Name</label>
-                        <input type="text" th:field="*{studentName}" placeholder="John Doe" />
+                        <label for="studentName">Student Name</label>
+                        <input id="studentName" type="text" th:field="*{studentName}" readonly>
                         <p class="error-msg" th:if="${#fields.hasErrors('studentName')}" th:errors="*{studentName}"></p>
                     </div>
 
                     <div class="form-group">
-                        <label>Campus Email</label>
-                        <input type="email" th:field="*{studentEmail}" placeholder="john@university.edu" />
+                        <label for="studentEmail">Student Email</label>
+                        <input id="studentEmail" type="email" th:field="*{studentEmail}" readonly>
                         <p class="error-msg" th:if="${#fields.hasErrors('studentEmail')}" th:errors="*{studentEmail}"></p>
                     </div>
 
                     <div class="form-group">
-                        <label>Department</label>
-                        <select th:field="*{studentDepartment}">
-                            <option value="">Select Department</option>
-                            <option value="Computer Science">Computer Science</option>
-                            <option value="Electrical Engineering">Electrical Engineering</option>
-                            <option value="Management">Management</option>
-                        </select>
+                        <label for="studentDepartment">Department</label>
+                        <input id="studentDepartment" type="text" th:field="*{studentDepartment}" readonly>
                         <p class="error-msg" th:if="${#fields.hasErrors('studentDepartment')}" th:errors="*{studentDepartment}"></p>
                     </div>
 
-                    <button type="submit" class="btn btn-primary" style="width: 100%;" 
-                            th:disabled="${event.registeredCount >= event.capacity}">
-                        <span th:if="${event.registeredCount < event.capacity}">Confirm Registration</span>
-                        <span th:if="${event.registeredCount >= event.capacity}">Event Full</span>
-                    </button>
+                    <button type="submit" class="btn btn-primary full-width">Confirm Registration</button>
                 </form>
             </div>
-        </div>
-    </main>
+        </section>
+    </div>
+</main>
 </body>
 </html>

@@ -2,35 +2,40 @@ package com.smartcampus.model;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "registrations")
+@Table(
+        name = "registrations",
+        uniqueConstraints = @UniqueConstraint(columnNames = {"event_id", "student_email"})
+)
 public class Registration {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotNull
+    @NotNull(message = "Event selection is required")
+    @Column(name = "event_id", nullable = false)
     private Long eventId;
 
+    @Column(name = "event_title", nullable = false)
     private String eventTitle;
 
     @NotBlank(message = "Name is required")
+    @Column(name = "student_name", nullable = false)
     private String studentName;
 
     @NotBlank(message = "Email is required")
     @Email(message = "Invalid email format")
+    @Column(name = "student_email", nullable = false)
     private String studentEmail;
 
     @NotBlank(message = "Department is required")
+    @Column(name = "student_department", nullable = false)
     private String studentDepartment;
 
+    @Column(name = "registration_date", nullable = false)
     private LocalDateTime registrationDate = LocalDateTime.now();
     
     @Max(5)

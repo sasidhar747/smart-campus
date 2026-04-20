@@ -1,45 +1,80 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: layout(~{::main})}">
 <body>
-    <main>
-        <a th:href="@{/admin/dashboard}" style="color: var(--primary); text-decoration: none; display: inline-block; margin-bottom: 1rem;">&larr; Back to Dashboard</a>
-        
-        <header style="margin-bottom: 2rem;">
-            <h1>Attendees for <span th:text="${event.title}">Event</span></h1>
-            <p style="color: var(--text-secondary);">List of students registered for this event.</p>
-        </header>
+<main>
+    <a th:href="@{/admin/dashboard}" class="back-link">&larr; Back to dashboard</a>
 
-        <div class="glass" style="padding: 1rem;">
-            <table th:if="${not #lists.isEmpty(registrations)}">
-                <thead>
-                    <tr>
-                        <th>Student Name</th>
-                        <th>Email</th>
-                        <th>Department</th>
-                        <th>Date Registered</th>
-                        <th>Rating</th>
-                        <th>Feedback</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr th:each="reg : ${registrations}">
-                        <td th:text="${reg.studentName}">Name</td>
-                        <td th:text="${reg.studentEmail}">Email</td>
-                        <td th:text="${reg.studentDepartment}">Dept</td>
-                        <td th:text="${#temporals.format(reg.registrationDate, 'dd MMM yyyy')}">Date</td>
-                        <td>
-                            <span th:if="${reg.rating > 0}" th:text="${'★'.repeat(reg.rating)}" style="color: #fbbf24;"></span>
-                            <span th:if="${reg.rating == 0}" style="color: var(--text-secondary);">N/A</span>
-                        </td>
-                        <td th:text="${reg.feedback}" style="max-width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" th:title="${reg.feedback}">Feedback</td>
-                    </tr>
-                </tbody>
-            </table>
-            
-            <div th:if="${#lists.isEmpty(registrations)}" style="text-align: center; padding: 3rem;">
-                <p style="color: var(--text-secondary);">No registrations for this event yet.</p>
+    <section class="section-header">
+        <div>
+            <h1 th:text="${event.title}">Event Title</h1>
+            <p>Registered students, departments, and submitted feedback for this event.</p>
+        </div>
+    </section>
+
+    <section class="glass panel">
+        <div class="detail-meta-grid">
+            <div class="meta-card">
+                <span>Type</span>
+                <strong th:text="${event.type}">Type</strong>
+            </div>
+            <div class="meta-card">
+                <span>Department</span>
+                <strong th:text="${event.department}">Department</strong>
+            </div>
+            <div class="meta-card">
+                <span>Date</span>
+                <strong th:text="${#temporals.format(event.eventDate, 'dd MMM yyyy, hh:mm a')}">Date</strong>
+            </div>
+            <div class="meta-card">
+                <span>Capacity</span>
+                <strong th:text="${event.registeredCount + ' / ' + event.capacity}">0 / 0</strong>
             </div>
         </div>
-    </main>
+    </section>
+
+    <section class="glass panel">
+        <div class="section-header compact">
+            <div>
+                <h2>Attendee List</h2>
+                <p>Registration records are ordered by most recent sign-up first.</p>
+            </div>
+        </div>
+
+        <div th:if="${not #lists.isEmpty(registrations)}" class="table-wrapper">
+            <table>
+                <thead>
+                <tr>
+                    <th>Student</th>
+                    <th>Email</th>
+                    <th>Department</th>
+                    <th>Registered On</th>
+                    <th>Rating</th>
+                    <th>Feedback</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="reg : ${registrations}">
+                    <td th:text="${reg.studentName}">Student</td>
+                    <td th:text="${reg.studentEmail}">Email</td>
+                    <td th:text="${reg.studentDepartment}">Department</td>
+                    <td th:text="${#temporals.format(reg.registrationDate, 'dd MMM yyyy, hh:mm a')}">Date</td>
+                    <td>
+                        <span th:if="${reg.rating > 0}" class="rating-stars">
+                            <span th:each="i : ${#numbers.sequence(1, reg.rating)}">&#9733;</span>
+                        </span>
+                        <span th:if="${reg.rating == 0}" class="muted-small">Not submitted</span>
+                    </td>
+                    <td th:text="${reg.feedback != null and !reg.feedback.isBlank() ? reg.feedback : 'No feedback yet'}">Feedback</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div th:if="${#lists.isEmpty(registrations)}" class="empty-state">
+            <h3>No students have registered for this event yet.</h3>
+            <p>Once students register, their records will appear here automatically.</p>
+        </div>
+    </section>
+</main>
 </body>
 </html>

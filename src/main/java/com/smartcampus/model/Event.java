@@ -2,9 +2,6 @@ package com.smartcampus.model;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDateTime;
@@ -26,6 +23,7 @@ public class Event {
     private String description;
 
     @NotNull(message = "Date and time are required")
+    @Future(message = "Event date must be in the future")
     @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm")
     private LocalDateTime eventDate;
 
@@ -75,4 +73,22 @@ public class Event {
     public void setCapacity(int capacity) { this.capacity = capacity; }
     public int getRegisteredCount() { return registeredCount; }
     public void setRegisteredCount(int registeredCount) { this.registeredCount = registeredCount; }
+
+    @Transient
+    public int getAvailableSeats() {
+        return Math.max(capacity - registeredCount, 0);
+    }
+
+    @Transient
+    public boolean isFull() {
+        return registeredCount >= capacity;
+    }
+
+    @Transient
+    public int getOccupancyPercentage() {
+        if (capacity <= 0) {
+            return 0;
+        }
+        return Math.min((registeredCount * 100) / capacity, 100);
+    }
 }
